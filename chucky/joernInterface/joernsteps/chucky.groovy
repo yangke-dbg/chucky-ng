@@ -43,37 +43,42 @@ Gremlin.defineStep('taintDownwards', [Vertex, Pipe], {
 	.dedup()
 });
 
-Gremlin.defineStep('forwardSlice', [Vertex, Pipe], { symbol ->
-	_()
-	.copySplit(
-		_(),
-		_().transform{
-			it.sideEffect{first = true;}
-			.outE('REACHES', 'CONTROLS')
-			.filter{it.label == 'CONTROLS' || !first || it.var == symbol}
-			.inV().gather{it}.scatter()
-			.sideEffect{first = false}
-			.loop(4){it.loops < 5}{true}
-		}.scatter()
-	).fairMerge()
-	.dedup()
+Gremlin.defineStep('forwardSlice', [Vertex, Pipe], { symbols,
+                     ORDER = 5, edgeTypes = ['REACHES', 'CONTROLS'] ->
+        _()
+        .copySplit(
+                _(),
+                _().sideEffect{first = true;}.as('x')
+                .transform{
+                          it.outE(*edgeTypes)
+                          .filter{it.label == 'CONTROLS' || !first || it.var in symbols}
+                          .inV().gather{it}.scatter()
+                          .sideEffect{first = false}
+                }.scatter()
+                .loop('x'){it.loops <= ORDER}{true}
+        ).fairMerge()
+        .dedup()
 });
 
-Gremlin.defineStep('backwardSlice', [Vertex, Pipe], { symbol ->
-	_()
-	.copySplit(
-		_(),
-		_().transform{
-			it.sideEffect{first = true;}
-			.inE('REACHES', 'CONTROLS')
-			.filter{it.label == 'CONTROLS' || !first || it.var == symbol}
-			.outV().gather{it}.scatter()
-			.sideEffect{first = false}
-			.loop(4){it.loops < 5}{true}
-		}.scatter()
-	).fairMerge()
-	.dedup()
+
+Gremlin.defineStep('backwardSlice', [Vertex, Pipe], { symbols,
+                     ORDER = 5, edgeTypes = ['REACHES', 'CONTROLS'] ->
+        _()
+        .copySplit(
+                _(),
+                _()
+                .sideEffect{first = true;}.as('x')
+                .transform{
+                        it.inE(*edgeTypes)
+                        .filter{it.label == 'CONTROLS' || !first || it.var in symbols}
+                        .outV().gather{it}.scatter()
+                        .sideEffect{first = false}
+                }.scatter()
+                .loop('x'){it.loops <= ORDER}{true}
+        ).fairMerge()
+        .dedup()
 });
+
 
 Gremlin.defineStep('statementToSinks', [Vertex, Pipe], { symbol ->
 	_()

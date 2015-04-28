@@ -42,18 +42,27 @@ class AnomalyScore(PipeTool):
     	return self.calculateDistance(dataPointIndex)
     	
     def calculateDistance(self, index):
-    	
-        self.emb.D = self.calculateCenterOfMass(index)
-        #print max((self.emb.D - self.emb.x[index]).data)
-        distance = (self.emb.D - self.emb.x[index])
-        for feat, score in zip(distance.indices, distance.data):
-            feat_string = self.emb.rFeatTable[feat].replace('%20', ' ')
-            print '{:+6.5f} {}'.format(score, feat_string)
+	try:
+	    self.emb.D = self.calculateCenterOfMass(index)
+	except Exception as e:
+	    sys.stderr.write(e)
+	else:
+	    #print max((self.emb.D - self.emb.x[index]).data)
+	    distance = (self.emb.D - self.emb.x[index])
+	    for feat, score in zip(distance.indices, distance.data):
+		feat_string = self.emb.rFeatTable[feat].replace('%20', ' ')
+		print '{:+6.5f} {}'.format(score, feat_string)
 
     def calculateCenterOfMass(self, index):
         A = self.emb.x[:index, :]
         B = self.emb.x[index+1:, :]
-        if A.nnz == 0:
+	if A.shape[0]==0 and B.shape[0]==0:
+	    raise IndexError('Warning: Job skipped! No neighborhood found for function:%s\n' % (self.emb.TOC[index]))
+	elif A.shape[0]==0 and B.shape[0]!=0:
+	    X = B
+	elif A.shape[0]!=0 and B.shape[0]==0:
+	    X = A
+	elif A.nnz == 0:
             X = B
         elif B.nnz == 0:
             X = A

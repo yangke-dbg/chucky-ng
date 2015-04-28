@@ -27,9 +27,9 @@ class SliceConditions(object):
         node_selection = self.statement.node_selection
         traversal_steps = []
         if self.category == SOURCE:
-            traversal_steps.append("forwardSlice('{}')".format(self.symbol))
+            traversal_steps.append("forwardSlice(['{}'])".format(self.symbol))
         else:
-            traversal_steps.append("backwardSlice('{}')".format(self.symbol))
+            traversal_steps.append("backwardSlice(['{}'])".format(self.symbol))
         traversal_steps.append("astNodes().filter{it.type == 'Condition'}")
         traversal_steps.append("dedup()")
         traversal_steps.append("normalize(['{}' : '\$SYM'])".format(self.symbol))

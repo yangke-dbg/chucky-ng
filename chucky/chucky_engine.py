@@ -56,7 +56,7 @@ class ChuckyEngine():
                 self._outputResult(result)
 
             else:
-                self.logger.warning('Job skipped, no neighbors found')
+                self.logger.warning('Job skipped, no neighbors found!')
 
 
         except Exception as e:
