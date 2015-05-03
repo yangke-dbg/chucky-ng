@@ -106,3 +106,16 @@ Gremlin.defineStep('statementToSinks', [Vertex, Pipe], { symbol ->
 		{it.type}
 	.dedup()
 });
+Gremlin.defineStep('statementToSources', [Vertex, Pipe], { symbol ->
+	_().as('x')
+	.inE('REACHES')
+	.outV()
+	.loop('x'){it.loops < 5}{true}
+	.dedup()
+	.astNodes()
+	.filter{it.type in ['IdentifierDecl','Parameter']}
+	.ithChildren('0').sideEffect{t=it.code}
+	.parents().ithChildren('1').sideEffect{c=it.code}
+	.transform{t + ":" + c}
+	.dedup()
+});

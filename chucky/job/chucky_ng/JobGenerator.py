@@ -13,11 +13,11 @@ on user queries.
 
 class JobGenerator(_JobGenerator):
 
-    def __init__(self, identifier, identifier_type):
+    def __init__(self, identifier, identifier_type,category=SOURCE):
         split = self.suffix = identifier.split(':', 1)
         identifier_prefix = split[0]
         _JobGenerator.__init__(self, identifier_prefix, identifier_type)
-        self.category = SOURCE
+        self.category = category
         self.suffix = split[1] if len(split) > 1 else None
         
     def _jobs_from_symbols(self, symbols):

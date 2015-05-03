@@ -12,7 +12,7 @@ DESCRIPTION = """Chucky analyzes functions for anomalies. To this end, the
 usage of symbols used by a function is analyzed by comparing the checks
 used in conjunction with the symbol with those used in similar functions."""
 DEFAULT_N = 30
-MIN_N = 5
+MIN_N = 1
 DEFAULT_DIR = ".chucky"
 
 def n_neighbors(value):
